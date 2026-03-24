@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDM Production">
+<meta name="theme-color" content="#1a1f2e">
+<title>CDM Holdings – Daily Production</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --red: #c0392b;
+  --white: #f5f5f0;
+  --steel: #2c3e50;
+  --gold: #e8a020;
+  --light-bg: #eef0f5;
+  --card: #ffffff;
+  --border: #d0d5e0;
+  --text: #1a1f2e;
+  --muted: #6b7280;
+  --success: #27ae60;
+  --input-bg: #f8f9fc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'Barlow', sans-serif; background: var(--light-bg); color: var(--text); overflow-x: hidden; }
+
+/* ── TOP HEADER ─────────────────────────────── */
+#app-header {
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 16px 10px;
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+#app-header img { height: 44px; border-radius: 6px; background: #fff; padding: 2px 6px; }
+.header-title { flex: 1; }
+.header-title h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: .5px; line-height: 1; }
+.header-title p { font-size: 11px; opacity: .7; margin-top: 2px; }
+#weather-badge {
+  background: rgba(255,255,255,.12);
+  border-radius: 8px; padding: 5px 8px; text-align: center; min-width: 62px; cursor: pointer;
+}
+#weather-badge .temp { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1; }
+#weather-badge .cond { font-size: 10px; opacity: .8; }
+
+/* ── NAV TABS ────────────────────────────────── */
+#nav-tabs {
+  display: flex; background: var(--navy); border-top: 1px solid rgba(255,255,255,.1);
+  position: sticky; top: 66px; z-index: 99; overflow-x: auto; scrollbar-width: none;
+}
+#nav-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex: 0 0 auto; padding: 9px 14px; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  color: rgba(255,255,255,.55); background: none; border: none; cursor: pointer;
+  border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap;
+}
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ── SECTIONS ────────────────────────────────── */
+.section { display: none; padding: 14px; animation: fadeIn .2s; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ── CARDS ───────────────────────────────────── */
+.card {
+  background: var(--card); border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px; color: var(--navy);
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--red);
+  display: flex; align-items: center; gap: 6px;
+}
+.card-title .icon { font-size: 16px; }
+
+/* ── FORM ELEMENTS ───────────────────────────── */
+.field-group { margin-bottom: 10px; }
+label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+input, select, textarea {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'Barlow', sans-serif; font-size: 15px; background: var(--input-bg); color: var(--text);
+  transition: border-color .2s; -webkit-appearance: none; appearance: none;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--navy); background: #fff; }
+textarea { resize: vertical; min-height: 70px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* ── BUTTONS ─────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 18px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700; letter-spacing: .5px; cursor: pointer; transition: all .15s;
+  text-transform: uppercase;
+}
+.btn-primary { background: var(--navy); color: #fff; width: 100%; margin-top: 4px; }
+.btn-primary:active { background: #111a30; transform: scale(.98); }
+.btn-red { background: var(--red); color: #fff; }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-sm { padding: 7px 12px; font-size: 13px; }
+.btn-outline { background: transparent; border: 1.5px solid var(--navy); color: var(--navy); }
+
+/* ── RESULT BOXES ────────────────────────────── */
+.result-box {
+  background: linear-gradient(135deg, var(--navy), #2a3a60);
+  color: #fff; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+}
+.result-box .label { font-size: 11px; opacity: .7; text-transform: uppercase; letter-spacing: .5px; }
+.result-box .value { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; line-height: 1.1; }
+.result-box .unit { font-size: 12px; opacity: .7; }
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.result-box.highlight { background: linear-gradient(135deg, var(--red), #9b2c20); }
+.result-box.gold { background: linear-gradient(135deg, #c07818, #e8a020); }
+
+/* ── WEATHER EXPANDED ────────────────────────── */
+#weather-panel {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.6); z-index: 200; align-items: flex-end;
+}
+#weather-panel.open { display: flex; }
+#weather-inner {
+  background: var(--navy); color: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 20px;
+}
+.weather-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.weather-header h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; }
+.weather-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 10px; }
+.w-item { background: rgba(255,255,255,.1); border-radius: 8px; padding: 10px; text-align: center; }
+.w-item .v { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
+.w-item .l { font-size: 11px; opacity: .65; margin-top: 2px; }
+#weather-location { opacity: .65; font-size: 12px; margin-top: 8px; }
+
+/* ── PHOTO SECTION ───────────────────────────── */
+.photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 8px; }
+.photo-thumb {
+  aspect-ratio: 1; border-radius: 6px; object-fit: cover; width: 100%;
+  background: var(--input-bg); display: flex; align-items: center; justify-content: center;
+  font-size: 24px; cursor: pointer; overflow: hidden; border: 1.5px solid var(--border);
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-add { background: var(--input-bg); border: 1.5px dashed var(--border); color: var(--muted); font-size: 28px; border-radius: 8px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#photo-input, #ticket-scan-input { display: none; }
+
+/* ── SIGNATURE ───────────────────────────────── */
+#sig-canvas { border: 1.5px solid var(--border); border-radius: 8px; background: #fff; touch-action: none; width: 100%; height: 120px; }
+
+/* ── TICKETS TABLE ───────────────────────────── */
+.ticket-row {
+  background: var(--input-bg); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+  border-left: 3px solid var(--navy); position: relative;
+}
+.ticket-row .tr-head { display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; }
+.ticket-row .tr-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.del-btn { background: none; border: none; color: var(--red); font-size: 18px; cursor: pointer; padding: 0 4px; }
+.tally-bar { background: var(--navy); color: #fff; border-radius: 8px; padding: 10px 14px; margin-top: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; }
+
+/* ── METER DISPLAY ───────────────────────────── */
+.meter-total { background: linear-gradient(135deg,#1a5c3a,#27ae60); color:#fff; border-radius:10px; padding:12px 14px; text-align:center; }
+.meter-total .v { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:800; }
+.meter-total .l { font-size:12px; opacity:.8; }
+
+/* ── HISTORY ─────────────────────────────────── */
+.hist-item { background:var(--card); border-radius:10px; padding:12px 14px; margin-bottom:10px; border-left:4px solid var(--gold); cursor:pointer; }
+.hist-item h3 { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; }
+.hist-item p { font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* ── TOAST ───────────────────────────────────── */
+#toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1a2744; color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:600; z-index:300; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; }
+#toast.show { opacity:1; }
+
+/* ── BOTTOM SAVE BAR ─────────────────────────── */
+#save-bar { position:fixed; bottom:0; left:0; right:0; background:var(--navy); padding:10px 14px; display:flex; gap:10px; z-index:100; box-shadow:0 -2px 10px rgba(0,0,0,.3); }
+#save-bar .btn { flex:1; padding:13px; font-size:16px; }
+
+/* ── OVERWRITE BADGE ─────────────────────────── */
+.overwrite-note { font-size:11px; color:var(--muted); margin-top:3px; font-style:italic; }
+
+/* ── SCANNED TICKET IMG ──────────────────────── */
+.scanned-img { width:100%; max-height:160px; object-fit:contain; border-radius:6px; margin-top:8px; border:1px solid var(--border); }
+
+/* ── scrollbar hide ─────── */
+body::-webkit-scrollbar { width:0; }
+/* ── bottom padding so save bar doesn't cover content ── */
+.section { padding-bottom: 90px; }
+</style>
+</head>
+<body>
+
+<!-- LOGO DATA URI inserted via JS -->
+<header id="app-header">
+  <img id="logo-img" src="/mnt/user-data/uploads/CDM_logo_.png" alt="CDM Holdings" onerror="this.style.display='none'">
+  <div class="header-title">
+    <h1>Daily Production Log</h1>
+    <p id="header-date"></p>
+  </div>
+  <div id="weather-badge" onclick="toggleWeather()">
+    <div class="temp" id="w-temp">--°</div>
+    <div class="cond" id="w-cond">Weather</div>
+  </div>
+</header>
+
+<div id="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('job')">⚙ Job / Mix</button>
+  <button class="tab-btn" onclick="showTab('prod')">📏 Production</button>
+  <button class="tab-btn" onclick="showTab('tickets')">🧾 Tickets</button>
+  <button class="tab-btn" onclick="showTab('water')">💧 Water</button>
+  <button class="tab-btn" onclick="showTab('media')">📸 Photos</button>
+  <button class="tab-btn" onclick="showTab('sign')">✍ Sign</button>
+  <button class="tab-btn" onclick="showTab('history')">📂 History</button>
+</div>
+
+<!-- ═══════════════════════════════════ JOB / MIX ═══ -->
+<div id="sec-job" class="section active">
+
+  <!-- CIR / FDR BIG TOGGLE -->
+  <div style="display:flex;gap:0;margin-bottom:12px;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.18);">
+    <button id="toggle-cir" onclick="setAppType('CIR')"
+      style="flex:1;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px;border:none;cursor:pointer;background:#1a2744;color:#e8a020;transition:all .2s;">
+      CIR
+    </button>
+    <button id="toggle-fdr" onclick="setAppType('FDR')"
+      style="flex:1;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px;border:none;cursor:pointer;background:#d0d5e0;color:#6b7280;transition:all .2s;">
+      FDR
+    </button>
+  </div>
+  <input type="hidden" id="app-type" value="CIR">
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> Job Information</div>
+    <div class="field-group">
+      <label>Job Name / Project</label>
+      <input id="job-name" type="text" placeholder="Enter project name">
+    </div>
+    <div class="row3">
+      <div class="field-group">
+        <label>Date</label>
+        <input id="job-date" type="date">
+      </div>
+      <div class="field-group">
+        <label>Start Time</label>
+        <input id="start-time" type="time" oninput="calcHours()">
+      </div>
+      <div class="field-group">
+        <label>End Time</label>
+        <input id="end-time" type="time" oninput="calcHours()">
+      </div>
+    </div>
+    <div id="hours-result" style="display:none; margin-bottom:10px;">
+      <div class="tally-bar" id="hours-bar"></div>
+    </div>
+    <div class="field-group">
+        <label>Foreman</label>
+        <input id="foreman" type="text" placeholder="Name">
+      </div>
+    <div class="field-group">
+      <label>Location / Road</label>
+      <input id="job-location" type="text" placeholder="Road name / station">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🧪</span> Mix Design</div>
+    <!-- Binder type selector -->
+    <div class="field-group" style="margin-bottom:12px;">
+      <label>Binder Type</label>
+      <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);">
+        <button id="binder-emul-btn" onclick="setBinderType('emulsion')"
+          style="flex:1;padding:10px 6px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;background:#1a2744;color:#e8a020;transition:all .2s;letter-spacing:.5px;">
+          Emulsion
+        </button>
+        <button id="binder-foam-btn" onclick="setBinderType('foam')"
+          style="flex:1;padding:10px 6px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;background:#eef0f5;color:#6b7280;transition:all .2s;letter-spacing:.5px;">
+          Foamed AC
+        </button>
+      </div>
+      <input type="hidden" id="binder-type" value="emulsion">
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label id="emul-label">Emulsion %</label>
+        <input id="emul-pct" type="number" step="0.1" placeholder="e.g. 3.0" oninput="calcMix()">
+      </div>
+      <div class="field-group">
+        <label>Cement %</label>
+        <input id="cement-pct" type="number" step="0.1" placeholder="e.g. 1.5" oninput="calcMix()">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Water %</label>
+        <input id="water-pct" type="number" step="0.1" placeholder="e.g. 2.0" oninput="calcMix()">
+      </div>
+      <div class="field-group">
+        <label>Additive %</label>
+        <input id="add-pct" type="number" step="0.1" placeholder="e.g. 0.5" oninput="calcMix()">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Dry Density (lbs/ft³)</label>
+        <input id="dry-density" type="number" step="0.1" placeholder="e.g. 125" oninput="calcMix()">
+      </div>
+      <div class="field-group">
+        <label>Depth (inches)</label>
+        <input id="depth-in" type="number" step="0.5" placeholder="e.g. 8" oninput="calcMix()">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Width (feet)</label>
+        <input id="width-ft" type="number" step="0.5" placeholder="e.g. 24" oninput="calcMix()">
+      </div>
+      <div class="field-group">
+        <label>Length Today (ft)</label>
+        <input id="length-ft" type="number" step="1" placeholder="e.g. 5280" oninput="calcMix()">
+      </div>
+    </div>
+
+    <div id="mix-results" style="margin-top:12px; display:none;">
+      <div class="results-grid">
+        <div class="result-box"><div class="label">Total Tons RAP</div><div class="value" id="r-rap">--</div><div class="unit">tons</div></div>
+        <div class="result-box highlight"><div class="label" id="r-emul-label">Emulsion</div><div class="value" id="r-emul">--</div><div class="unit">gallons</div></div>
+        <div class="result-box"><div class="label">Cement</div><div class="value" id="r-cement">--</div><div class="unit">tons</div></div>
+        <div class="result-box gold"><div class="label">Add'l Water</div><div class="value" id="r-water">--</div><div class="unit">gallons</div></div>
+        <div class="result-box"><div class="label">Additive</div><div class="value" id="r-add">--</div><div class="unit">lbs</div></div>
+        <div class="result-box"><div class="label">Volume</div><div class="value" id="r-vol">--</div><div class="unit">yd³</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🚚</span> Transport Calculator</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Enter gallons loaded — see how far the truck will travel at set width/depth</p>
+    <div class="row2">
+      <div class="field-group">
+        <label>Gallons Loaded</label>
+        <input id="truck-gal" type="number" placeholder="e.g. 5000" oninput="calcTruck()">
+      </div>
+      <div class="field-group">
+        <label id="truck-pct-label">Binder % (from above)</label>
+        <input id="truck-epct" type="number" step="0.1" placeholder="auto-fill" oninput="calcTruck()">
+      </div>
+    </div>
+    <div id="truck-result" style="display:none; margin-top:6px;">
+      <div class="result-box highlight">
+        <div class="label">Estimated Travel Distance</div>
+        <div class="value" id="truck-dist">--</div>
+        <div class="unit">feet &nbsp;|&nbsp; <span id="truck-miles">-- miles</span></div>
+      </div>
+      <div class="result-box" id="foam-water-box" style="margin-top:8px; display:none;">
+        <div class="label">Est. Foaming Water Needed (FDR Foamed AC)</div>
+        <div class="value" id="foam-water">--</div>
+        <div class="unit">gallons @ 2% of AC weight · see Water tab for full calc</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ PRODUCTION ═══ -->
+<div id="sec-prod" class="section">
+  <div class="card">
+    <div class="card-title"><span class="icon">📏</span> Daily Production Totals</div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Start Station</label>
+        <input id="sta-start" type="text" placeholder="e.g. 0+00">
+      </div>
+      <div class="field-group">
+        <label>End Station</label>
+        <input id="sta-end" type="text" placeholder="e.g. 52+80">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Total Feet Completed</label>
+        <input id="prod-feet" type="number" placeholder="auto or override" oninput="markOverride('prod-feet')">
+        <div class="overwrite-note">↑ Auto from mix design or override</div>
+      </div>
+      <div class="field-group">
+        <label>Total Tons RAP</label>
+        <input id="prod-rap" type="number" step="0.1" placeholder="auto or override" oninput="markOverride('prod-rap')">
+        <div class="overwrite-note">↑ Override includes leftover</div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label id="prod-emul-label">Emulsion (gal)</label>
+        <input id="prod-emul" type="number" step="1" placeholder="auto or override" oninput="markOverride('prod-emul')">
+      </div>
+      <div class="field-group">
+        <label>Cement (tons)</label>
+        <input id="prod-cement" type="number" step="0.1" placeholder="auto or override" oninput="markOverride('prod-cement')">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Water Added (gal)</label>
+        <input id="prod-water" type="number" step="1" placeholder="auto or override" oninput="markOverride('prod-water')">
+      </div>
+      <div class="field-group">
+        <label>Additive (lbs)</label>
+        <input id="prod-add" type="number" step="1" placeholder="auto or override" oninput="markOverride('prod-add')">
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Notes / Comments</label>
+      <textarea id="prod-notes" placeholder="Field conditions, issues, observations..."></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🌡️</span> Weather Conditions</div>
+    <div class="row3">
+      <div class="field-group">
+        <label>Temp (°F)</label>
+        <input id="wx-temp" type="number" placeholder="Auto">
+      </div>
+      <div class="field-group">
+        <label>Humidity %</label>
+        <input id="wx-humid" type="number" placeholder="Auto">
+      </div>
+      <div class="field-group">
+        <label>Wind (mph)</label>
+        <input id="wx-wind" type="number" placeholder="Auto">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Conditions</label>
+        <select id="wx-cond">
+          <option>Sunny</option>
+          <option>Partly Cloudy</option>
+          <option>Cloudy</option>
+          <option>Rain</option>
+          <option>Windy</option>
+          <option>Hot</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Pavement Temp (°F)</label>
+        <input id="wx-pavetemp" type="number" placeholder="e.g. 140">
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="fetchWeather()">📍 Refresh Weather</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ TICKETS ═══ -->
+<div id="sec-tickets" class="section">
+  <div class="card">
+    <div class="card-title"><span class="icon">➕</span> Add Material Ticket</div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Ticket #</label>
+        <input id="tk-num" type="text" placeholder="Ticket number">
+      </div>
+      <div class="field-group">
+        <label>Supplier</label>
+        <select id="tk-supplier">
+          <option value="">Select supplier</option>
+          <option>Martin Marietta</option>
+          <option>Quikrete</option>
+          <option>US Lime</option>
+          <option>RK Hall</option>
+          <option>Ergon</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Material</label>
+        <select id="tk-material">
+          <option value="">Select material</option>
+          <option>Emulsion</option>
+          <option>Foamed AC</option>
+          <option>Cement</option>
+          <option>Water</option>
+          <option>Additive</option>
+          <option>RAP</option>
+          <option>Aggregate</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Unit</label>
+        <select id="tk-unit">
+          <option value="gallons">Gallons</option>
+          <option value="tons">Tons</option>
+          <option value="lbs">Lbs</option>
+          <option value="yards">Yards</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Quantity</label>
+        <input id="tk-qty" type="number" step="0.01" placeholder="Amount">
+      </div>
+      <div class="field-group">
+        <label>Load Time</label>
+        <input id="tk-time" type="time">
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Scan Ticket (Camera)</label>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('ticket-scan-input').click()">📷 Scan Ticket</button>
+      <input type="file" id="ticket-scan-input" accept="image/*" capture="environment" onchange="handleTicketScan(event)">
+      <img id="ticket-scanned-preview" class="scanned-img" style="display:none">
+    </div>
+    <button class="btn btn-red" onclick="addTicket()" style="margin-top:6px;">+ Add Ticket</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🧾</span> Ticket Log</div>
+    <div id="ticket-list"></div>
+    <div class="tally-bar" id="ticket-tally" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ WATER METER ═══ -->
+<div id="sec-water" class="section">
+  <div class="card">
+    <div class="card-title"><span class="icon">💧</span> Water Meter</div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Start Meter (gal)</label>
+        <input id="meter-start" type="number" placeholder="Reading at start" oninput="calcMeter()">
+      </div>
+      <div class="field-group">
+        <label>End Meter (gal)</label>
+        <input id="meter-end" type="number" placeholder="Reading at end" oninput="calcMeter()">
+      </div>
+    </div>
+    <div id="meter-result" style="margin-top:10px; display:none;">
+      <div class="meter-total">
+        <div class="l">Daily Water Usage</div>
+        <div class="v" id="meter-total">-- gal</div>
+      </div>
+    </div>
+    <div class="field-group" style="margin-top:10px;">
+      <label>Water Truck Notes</label>
+      <textarea id="water-notes" placeholder="Truck number, driver, route notes..."></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🫧</span> Foamed AC Water Calculator</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">FDR foamed asphalt uses <strong>AC binder</strong> (not emulsion). Foaming water is injected at the nozzle — typically 1–3% of AC weight.</p>
+    <div class="row2">
+      <div class="field-group">
+        <label>AC Product Used (gal)</label>
+        <input id="foam-emul-in" type="number" placeholder="Total AC gallons" oninput="calcFoam()">
+      </div>
+      <div class="field-group">
+        <label>Foam Water % of AC</label>
+        <input id="foam-pct" type="number" step="0.1" value="2.0" oninput="calcFoam()">
+      </div>
+    </div>
+    <div class="field-group">
+      <label>AC Density (lbs/gal)</label>
+      <input id="ac-density" type="number" step="0.01" value="8.0" placeholder="e.g. 8.0" oninput="calcFoam()">
+      <div class="overwrite-note">Typical AC-20: ~8.0 lbs/gal</div>
+    </div>
+    <div id="foam-result" style="display:none; margin-top:8px;">
+      <div class="result-box gold">
+        <div class="label">Foaming Water Required</div>
+        <div class="value" id="foam-out">--</div>
+        <div class="unit">gallons injected at nozzle</div>
+      </div>
+      <div class="result-box" style="margin-top:8px;">
+        <div class="label">AC Product Weight</div>
+        <div class="value" id="ac-weight-out">--</div>
+        <div class="unit">lbs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ PHOTOS ═══ -->
+<div id="sec-media" class="section">
+  <div class="card">
+    <div class="card-title"><span class="icon">📸</span> Job Photos</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('photo-input').click()">📷 Camera</button>
+      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openLibrary()">🖼 Library</button>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" capture="environment" multiple onchange="handlePhotos(event)">
+    <input type="file" id="library-input" accept="image/*" multiple onchange="handlePhotos(event)" style="display:none">
+    <div class="photo-grid" id="photo-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📝</span> Field Notes</div>
+    <textarea id="field-notes" style="min-height:120px;" placeholder="Detailed field notes, observations, problems encountered, resolutions..."></textarea>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SIGNATURE ═══ -->
+<div id="sec-sign" class="section">
+  <div class="card">
+    <div class="card-title"><span class="icon">✍</span> Foreman Signature</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Sign below to certify daily production report</p>
+    <canvas id="sig-canvas"></canvas>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="clearSig()">Clear</button>
+      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveSig()">Save Signature</button>
+    </div>
+    <img id="sig-preview" style="display:none;width:100%;margin-top:10px;border:1px solid var(--border);border-radius:6px;" alt="Saved signature">
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">👷</span> Inspector / Owner Rep</div>
+    <div class="field-group">
+      <label>Inspector Name</label>
+      <input id="inspector-name" type="text" placeholder="Inspector name">
+    </div>
+    <canvas id="insp-sig-canvas" style="border:1.5px solid var(--border);border-radius:8px;background:#fff;touch-action:none;width:100%;height:100px;"></canvas>
+    <button class="btn btn-outline btn-sm" style="margin-top:6px;width:100%;" onclick="clearSig2()">Clear Inspector Signature</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ HISTORY ═══ -->
+<div id="sec-history" class="section">
+  <div class="card">
+    <div class="card-title"><span class="icon">📂</span> Saved Reports</div>
+    <div id="history-list"><p style="color:var(--muted);font-size:13px;">No saved reports yet. Save today's log to see history.</p></div>
+    <button class="btn btn-outline btn-sm" style="margin-top:10px;width:100%;" onclick="clearHistory()">🗑 Clear All History</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ WEATHER PANEL ═══ -->
+<div id="weather-panel" onclick="toggleWeather()">
+  <div id="weather-inner" onclick="event.stopPropagation()">
+    <div class="weather-header">
+      <h2>🌤 Current Weather</h2>
+      <button class="btn btn-outline btn-sm" onclick="toggleWeather()">Close</button>
+    </div>
+    <div class="weather-row">
+      <div class="w-item"><div class="v" id="wp-temp">--</div><div class="l">Temp °F</div></div>
+      <div class="w-item"><div class="v" id="wp-feels">--</div><div class="l">Feels Like</div></div>
+      <div class="w-item"><div class="v" id="wp-humid">--</div><div class="l">Humidity</div></div>
+    </div>
+    <div class="weather-row">
+      <div class="w-item"><div class="v" id="wp-wind">--</div><div class="l">Wind mph</div></div>
+      <div class="w-item"><div class="v" id="wp-dew">--</div><div class="l">Dew Pt °F</div></div>
+      <div class="w-item"><div class="v" id="wp-vis">--</div><div class="l">Visibility</div></div>
+    </div>
+    <div class="w-item" style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px;text-align:center;font-size:16px;font-weight:700;" id="wp-desc">--</div>
+    <div id="weather-location" style="text-align:center;margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SAVE BAR -->
+<div id="save-bar">
+  <button class="btn btn-outline" onclick="loadPrevDay()" style="color:#fff;border-color:rgba(255,255,255,.4);">↩ Load Prev</button>
+  <button class="btn btn-primary btn-red" onclick="saveReport()">💾 Save Report</button>
+  <button class="btn btn-gold" onclick="exportPDF()">📤 Export</button>
+</div>
+
+<script>
+// ═══════════ STATE ═══════════
+let photos = [];
+let tickets = [];
+let sigDrawing = false, sigCanvas, sigCtx;
+let sigDrawing2 = false, sigCanvas2, sigCtx2;
+let weatherData = null;
+const overrides = new Set();
+
+// ═══════════ INIT ═══════════
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  document.getElementById('job-date').value = today.toISOString().split('T')[0];
+  document.getElementById('header-date').textContent =
+    today.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+
+  const now = today.toTimeString().slice(0,5);
+  document.getElementById('start-time').value = now;
+
+  setupSig('sig-canvas', false);
+  setupSig2('insp-sig-canvas');
+  fetchWeather();
+  renderHistory();
+  loadPhotoGrid();
+});
+
+// ═══════════ TABS ═══════════
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ═══════════ MIX CALC ═══════════
+function calcMix() {
+  const dd = parseFloat(document.getElementById('dry-density').value) || 0;
+  const depth = parseFloat(document.getElementById('depth-in').value) || 0;
+  const width = parseFloat(document.getElementById('width-ft').value) || 0;
+  const length = parseFloat(document.getElementById('length-ft').value) || 0;
+  const ePct = parseFloat(document.getElementById('emul-pct').value) || 0;
+  const cPct = parseFloat(document.getElementById('cement-pct').value) || 0;
+  const wPct = parseFloat(document.getElementById('water-pct').value) || 0;
+  const aPct = parseFloat(document.getElementById('add-pct').value) || 0;
+  const binderType = document.getElementById('binder-type')?.value || 'emulsion';
+  const binderDensity = binderType === 'foam' ? 8.0 : 8.33; // lbs/gal
+
+  if (!dd || !depth || !width || !length) return;
+
+  const depthFt = depth / 12;
+  const volCuFt = width * depthFt * length;
+  const volCuYd = volCuFt / 27;
+  const massLbs = volCuFt * dd;
+  const massTons = massLbs / 2000;
+
+  const binderGal = (massLbs * (ePct / 100)) / binderDensity;
+  const cementTons = massTons * (cPct / 100);
+  const waterGal = (massLbs * (wPct / 100)) / 8.33;
+  const addLbs = massLbs * (aPct / 100);
+
+  document.getElementById('r-rap').textContent = massTons.toFixed(1);
+  document.getElementById('r-emul').textContent = binderGal.toFixed(0);
+  document.getElementById('r-cement').textContent = cementTons.toFixed(2);
+  document.getElementById('r-water').textContent = waterGal.toFixed(0);
+  document.getElementById('r-add').textContent = addLbs.toFixed(0);
+  document.getElementById('r-vol').textContent = volCuYd.toFixed(1);
+  document.getElementById('mix-results').style.display = 'block';
+
+  // Auto-fill transport calc binder pct
+  document.getElementById('truck-epct').value = ePct;
+
+  // Auto-populate production totals if not overridden
+  if (!overrides.has('prod-rap')) document.getElementById('prod-rap').value = massTons.toFixed(1);
+  if (!overrides.has('prod-emul')) document.getElementById('prod-emul').value = binderGal.toFixed(0);
+  if (!overrides.has('prod-cement')) document.getElementById('prod-cement').value = cementTons.toFixed(2);
+  if (!overrides.has('prod-water')) document.getElementById('prod-water').value = waterGal.toFixed(0);
+  if (!overrides.has('prod-add')) document.getElementById('prod-add').value = addLbs.toFixed(0);
+  if (!overrides.has('prod-feet')) document.getElementById('prod-feet').value = length.toFixed(0);
+
+  calcTruck();
+}
+
+function markOverride(id) { overrides.add(id); }
+
+// ═══════════ HOURS CALC ═══════════
+function calcHours() {
+  const s = document.getElementById('start-time').value;
+  const e = document.getElementById('end-time').value;
+  if (!s || !e) return;
+  const [sh, sm] = s.split(':').map(Number);
+  const [eh, em] = e.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins < 0) mins += 1440;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  document.getElementById('hours-bar').textContent = `⏱ Total Time: ${hrs}h ${rem}m`;
+  document.getElementById('hours-result').style.display = 'block';
+}
+
+// ═══════════ TRANSPORT CALC ═══════════
+function calcTruck() {
+  const gal = parseFloat(document.getElementById('truck-gal').value) || 0;
+  const ePct = parseFloat(document.getElementById('truck-epct').value) ||
+                parseFloat(document.getElementById('emul-pct').value) || 0;
+  const depth = parseFloat(document.getElementById('depth-in').value) || 0;
+  const width = parseFloat(document.getElementById('width-ft').value) || 0;
+  const dd = parseFloat(document.getElementById('dry-density').value) || 0;
+  const binderType = document.getElementById('binder-type')?.value || 'emulsion';
+  const binderDensity = binderType === 'foam' ? 8.0 : 8.33;
+
+  if (!gal || !ePct || !depth || !width || !dd) return;
+
+  const depthFt = depth / 12;
+  const lbsPerFt = width * depthFt * dd;
+  const binderPerFt = (lbsPerFt * (ePct / 100)) / binderDensity;
+  const distFt = gal / binderPerFt;
+  const distMi = distFt / 5280;
+
+  document.getElementById('truck-dist').textContent = distFt.toFixed(0);
+  document.getElementById('truck-miles').textContent = distMi.toFixed(2) + ' miles';
+  document.getElementById('truck-result').style.display = 'block';
+
+  // Foaming water only relevant for Foamed AC
+  const fwBox = document.getElementById('foam-water-box');
+  if (binderType === 'foam') {
+    const acLbs = gal * binderDensity;
+    const foamWater = (acLbs * 0.02) / 8.34; // 2% of AC weight
+    document.getElementById('foam-water').textContent = foamWater.toFixed(0);
+    if (fwBox) fwBox.style.display = 'block';
+  } else {
+    if (fwBox) fwBox.style.display = 'none';
+  }
+}
+
+// ═══════════ METER ═══════════
+function calcMeter() {
+  const s = parseFloat(document.getElementById('meter-start').value) || 0;
+  const e = parseFloat(document.getElementById('meter-end').value) || 0;
+  if (s && e && e > s) {
+    document.getElementById('meter-total').textContent = (e - s).toLocaleString() + ' gal';
+    document.getElementById('meter-result').style.display = 'block';
+  }
+}
+
+// ═══════════ BINDER TYPE ═══════════
+function setBinderType(type) {
+  document.getElementById('binder-type').value = type;
+  const isEmul = type === 'emulsion';
+  const eBtn = document.getElementById('binder-emul-btn');
+  const fBtn = document.getElementById('binder-foam-btn');
+  eBtn.style.background = isEmul ? '#1a2744' : '#eef0f5';
+  eBtn.style.color = isEmul ? '#e8a020' : '#6b7280';
+  fBtn.style.background = isEmul ? '#eef0f5' : '#c0392b';
+  fBtn.style.color = isEmul ? '#6b7280' : '#fff';
+
+  const label = isEmul ? 'Emulsion %' : 'Foamed AC %';
+  const shortLabel = isEmul ? 'Emulsion' : 'Foamed AC';
+  document.getElementById('emul-label').textContent = label;
+  const rLbl = document.getElementById('r-emul-label');
+  if (rLbl) rLbl.textContent = shortLabel;
+  const pLbl = document.getElementById('prod-emul-label');
+  if (pLbl) pLbl.textContent = shortLabel + ' (gal)';
+  const tLbl = document.getElementById('truck-pct-label');
+  if (tLbl) tLbl.textContent = shortLabel + ' % (from above)';
+
+  // Show/hide foaming water row in transport calc
+  const fwBox = document.getElementById('foam-water-box');
+  if (fwBox) fwBox.style.display = isEmul ? 'none' : 'block';
+
+  calcMix();
+}
+
+// ═══════════ APP TYPE TOGGLE ═══════════
+function setAppType(type) {
+  document.getElementById('app-type').value = type;
+  const cirBtn = document.getElementById('toggle-cir');
+  const fdrBtn = document.getElementById('toggle-fdr');
+  if (type === 'CIR') {
+    cirBtn.style.background = '#1a2744'; cirBtn.style.color = '#e8a020';
+    fdrBtn.style.background = '#d0d5e0'; fdrBtn.style.color = '#6b7280';
+  } else {
+    fdrBtn.style.background = '#c0392b'; fdrBtn.style.color = '#fff';
+    cirBtn.style.background = '#d0d5e0'; cirBtn.style.color = '#6b7280';
+  }
+}
+
+function calcFoam() {
+  const acGal = parseFloat(document.getElementById('foam-emul-in').value) || 0;
+  const pct = parseFloat(document.getElementById('foam-pct').value) || 2;
+  const density = parseFloat(document.getElementById('ac-density').value) || 8.0;
+  if (!acGal) return;
+  const acLbs = acGal * density;
+  const foamGal = (acLbs * (pct / 100)) / 8.34; // water ~8.34 lbs/gal
+  document.getElementById('foam-out').textContent = foamGal.toFixed(1);
+  document.getElementById('ac-weight-out').textContent = acLbs.toFixed(0);
+  document.getElementById('foam-result').style.display = 'block';
+}
+
+// ═══════════ TICKETS ═══════════
+let scannedTicketImg = null;
+
+function handleTicketScan(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    scannedTicketImg = e.target.result;
+    const preview = document.getElementById('ticket-scanned-preview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function addTicket() {
+  const num = document.getElementById('tk-num').value.trim();
+  const supplier = document.getElementById('tk-supplier').value;
+  const material = document.getElementById('tk-material').value;
+  const unit = document.getElementById('tk-unit').value;
+  const qty = parseFloat(document.getElementById('tk-qty').value) || 0;
+  const time = document.getElementById('tk-time').value;
+
+  if (!material || !qty) { toast('Enter material and quantity'); return; }
+
+  tickets.push({ id: Date.now(), num, supplier, material, unit, qty, time, img: scannedTicketImg });
+  scannedTicketImg = null;
+
+  // clear fields
+  ['tk-num','tk-qty','tk-time'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('tk-supplier').value = '';
+  document.getElementById('tk-material').value = '';
+  document.getElementById('ticket-scanned-preview').style.display = 'none';
+
+  renderTickets();
+  updateProductionFromTickets();
+  toast('Ticket added ✓');
+}
+
+function deleteTicket(id) {
+  tickets = tickets.filter(t => t.id !== id);
+  renderTickets();
+  updateProductionFromTickets();
+}
+
+function renderTickets() {
+  const list = document.getElementById('ticket-list');
+  if (!tickets.length) { list.innerHTML = '<p style="color:var(--muted);font-size:13px;">No tickets yet</p>'; document.getElementById('ticket-tally').style.display='none'; return; }
+
+  list.innerHTML = tickets.map(t => `
+    <div class="ticket-row">
+      <div class="tr-head">
+        <span>${t.material} ${t.img ? '📷' : ''}</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span>${t.qty} ${t.unit}</span>
+          <button class="del-btn" onclick="deleteTicket(${t.id})">✕</button>
+        </div>
+      </div>
+      <div class="tr-sub">${t.supplier || ''} ${t.num ? '· Ticket #'+t.num : ''} ${t.time ? '· '+t.time : ''}</div>
+      ${t.img ? `<img src="${t.img}" class="scanned-img">` : ''}
+    </div>
+  `).join('');
+
+  // Tally
+  const tally = {};
+  tickets.forEach(t => {
+    const k = t.material + '|' + t.unit;
+    tally[k] = (tally[k] || 0) + t.qty;
+  });
+  const tallyStr = Object.entries(tally).map(([k,v]) => {
+    const [mat, unit] = k.split('|');
+    return `${mat}: ${v.toFixed(2)} ${unit}`;
+  }).join('  ·  ');
+  document.getElementById('ticket-tally').textContent = '📊 ' + tallyStr;
+  document.getElementById('ticket-tally').style.display = 'flex';
+}
+
+function updateProductionFromTickets() {
+  const totals = {};
+  tickets.forEach(t => {
+    if (!totals[t.material]) totals[t.material] = {};
+    totals[t.material][t.unit] = (totals[t.material][t.unit] || 0) + t.qty;
+  });
+
+  const get = (mat, unit) => (totals[mat] && totals[mat][unit]) || 0;
+
+  // Binder — either Emulsion or Foamed AC feeds the same prod-emul field
+  if (!overrides.has('prod-emul')) {
+    const v = get('Emulsion','gallons') + get('Foamed AC','gallons');
+    if (v) document.getElementById('prod-emul').value = v.toFixed(0);
+  }
+  if (!overrides.has('prod-cement')) {
+    const v = get('Cement','tons');
+    if (v) document.getElementById('prod-cement').value = v.toFixed(2);
+  }
+  if (!overrides.has('prod-water')) {
+    const v = get('Water','gallons');
+    if (v) document.getElementById('prod-water').value = v.toFixed(0);
+  }
+  if (!overrides.has('prod-rap')) {
+    const v = get('RAP','tons');
+    if (v) document.getElementById('prod-rap').value = v.toFixed(1);
+  }
+  if (!overrides.has('prod-add')) {
+    const v = get('Additive','lbs');
+    if (v) document.getElementById('prod-add').value = v.toFixed(0);
+  }
+}
+
+// ═══════════ PHOTOS ═══════════
+function openLibrary() { document.getElementById('library-input').click(); }
+
+function handlePhotos(evt) {
+  Array.from(evt.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      photos.push({ id: Date.now() + Math.random(), src: e.target.result, name: file.name });
+      loadPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  let html = photos.map(p => `
+    <div class="photo-thumb" onclick="viewPhoto('${p.id}')">
+      <img src="${p.src}" alt="${p.name}">
+    </div>
+  `).join('');
+  html += `<div class="photo-add" onclick="document.getElementById('photo-input').click()">+</div>`;
+  grid.innerHTML = html;
+}
+
+function viewPhoto(id) {
+  const p = photos.find(x => x.id == id);
+  if (!p) return;
+  const win = window.open('');
+  win.document.write(`<img src="${p.src}" style="max-width:100%;max-height:100vh;">`);
+}
+
+// ═══════════ SIGNATURE ═══════════
+function setupSig(canvasId, second) {
+  sigCanvas = document.getElementById(canvasId);
+  sigCtx = sigCanvas.getContext('2d');
+  sigCanvas.width = sigCanvas.offsetWidth * window.devicePixelRatio;
+  sigCanvas.height = sigCanvas.offsetHeight * window.devicePixelRatio;
+  sigCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  sigCtx.strokeStyle = '#1a2744';
+  sigCtx.lineWidth = 2.5;
+  sigCtx.lineCap = 'round';
+
+  const getPos = (e) => {
+    const r = sigCanvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  };
+
+  sigCanvas.addEventListener('mousedown', e => { sigDrawing = true; const p = getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); });
+  sigCanvas.addEventListener('mousemove', e => { if (!sigDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); });
+  sigCanvas.addEventListener('mouseup', () => sigDrawing = false);
+  sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing = true; const p = getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); });
+  sigCanvas.addEventListener('touchmove', e => { e.preventDefault(); if (!sigDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); });
+  sigCanvas.addEventListener('touchend', () => sigDrawing = false);
+}
+
+function setupSig2(canvasId) {
+  sigCanvas2 = document.getElementById(canvasId);
+  sigCtx2 = sigCanvas2.getContext('2d');
+  sigCanvas2.width = sigCanvas2.offsetWidth * window.devicePixelRatio;
+  sigCanvas2.height = sigCanvas2.offsetHeight * window.devicePixelRatio;
+  sigCtx2.scale(window.devicePixelRatio, window.devicePixelRatio);
+  sigCtx2.strokeStyle = '#c0392b';
+  sigCtx2.lineWidth = 2.5;
+  sigCtx2.lineCap = 'round';
+
+  const getPos2 = (e) => {
+    const r = sigCanvas2.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  };
+  sigCanvas2.addEventListener('mousedown', e => { sigDrawing2 = true; const p = getPos2(e); sigCtx2.beginPath(); sigCtx2.moveTo(p.x, p.y); });
+  sigCanvas2.addEventListener('mousemove', e => { if (!sigDrawing2) return; const p = getPos2(e); sigCtx2.lineTo(p.x, p.y); sigCtx2.stroke(); });
+  sigCanvas2.addEventListener('mouseup', () => sigDrawing2 = false);
+  sigCanvas2.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing2 = true; const p = getPos2(e); sigCtx2.beginPath(); sigCtx2.moveTo(p.x, p.y); });
+  sigCanvas2.addEventListener('touchmove', e => { e.preventDefault(); if (!sigDrawing2) return; const p = getPos2(e); sigCtx2.lineTo(p.x, p.y); sigCtx2.stroke(); });
+  sigCanvas2.addEventListener('touchend', () => sigDrawing2 = false);
+}
+
+function clearSig() { sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); document.getElementById('sig-preview').style.display='none'; }
+function clearSig2() { sigCtx2.clearRect(0, 0, sigCanvas2.width, sigCanvas2.height); }
+function saveSig() {
+  const dataUrl = sigCanvas.toDataURL();
+  const preview = document.getElementById('sig-preview');
+  preview.src = dataUrl;
+  preview.style.display = 'block';
+  toast('Signature saved ✓');
+}
+
+// ═══════════ WEATHER ═══════════
+function toggleWeather() {
+  document.getElementById('weather-panel').classList.toggle('open');
+}
+
+async function fetchWeather() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,dewpoint_2m,apparent_temperature,windspeed_10m,visibility&temperature_unit=fahrenheit&windspeed_unit=mph`);
+      const data = await res.json();
+      const cw = data.current_weather;
+      const h = data.hourly;
+      const idx = 0;
+
+      const temp = Math.round(cw.temperature);
+      const wind = Math.round(cw.windspeed);
+      const humid = h.relativehumidity_2m[idx];
+      const feelsLike = Math.round(h.apparent_temperature[idx]);
+      const dew = Math.round(h.dewpoint_2m[idx]);
+      const vis = h.visibility ? (h.visibility[idx] / 5280).toFixed(1) + ' mi' : '--';
+
+      const wmo = {0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',51:'Drizzle',61:'Rain',71:'Snow',80:'Showers',95:'Thunderstorm'};
+      const cond = wmo[cw.weathercode] || 'Fair';
+
+      weatherData = { temp, wind, humid, feelsLike, dew, vis, cond };
+
+      // Update badge
+      document.getElementById('w-temp').textContent = temp + '°';
+      document.getElementById('w-cond').textContent = cond;
+
+      // Update panel
+      document.getElementById('wp-temp').textContent = temp + '°';
+      document.getElementById('wp-feels').textContent = feelsLike + '°';
+      document.getElementById('wp-humid').textContent = humid + '%';
+      document.getElementById('wp-wind').textContent = wind;
+      document.getElementById('wp-dew').textContent = dew + '°';
+      document.getElementById('wp-vis').textContent = vis;
+      document.getElementById('wp-desc').textContent = cond;
+      document.getElementById('weather-location').textContent = `📍 ${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+
+      // Auto-fill production weather fields if not entered
+      if (!document.getElementById('wx-temp').value) document.getElementById('wx-temp').value = temp;
+      if (!document.getElementById('wx-humid').value) document.getElementById('wx-humid').value = humid;
+      if (!document.getElementById('wx-wind').value) document.getElementById('wx-wind').value = wind;
+
+      const condSelect = document.getElementById('wx-cond');
+      if (cond.includes('Sunny') || cond === 'Clear') condSelect.value = 'Sunny';
+      else if (cond.includes('Cloudy')) condSelect.value = 'Partly Cloudy';
+      else if (cond.includes('Rain') || cond.includes('Shower')) condSelect.value = 'Rain';
+    } catch(e) { console.warn('Weather fetch failed', e); }
+  }, () => {}, { timeout: 8000 });
+}
+
+// ═══════════ SAVE / LOAD ═══════════
+function gatherData() {
+  return {
+    saved: new Date().toISOString(),
+    job: {
+      name: v('job-name'), date: v('job-date'), startTime: v('start-time'), endTime: v('end-time'),
+      appType: v('app-type'), foreman: v('foreman'), location: v('job-location')
+    },
+    mix: {
+      emulPct: v('emul-pct'), cementPct: v('cement-pct'), waterPct: v('water-pct'),
+      addPct: v('add-pct'), dryDensity: v('dry-density'), depth: v('depth-in'),
+      width: v('width-ft'), length: v('length-ft'), binderType: v('binder-type')
+    },
+    production: {
+      staStart: v('sta-start'), staEnd: v('sta-end'), feet: v('prod-feet'),
+      rap: v('prod-rap'), emul: v('prod-emul'), cement: v('prod-cement'),
+      water: v('prod-water'), add: v('prod-add'), notes: v('prod-notes')
+    },
+    weather: {
+      temp: v('wx-temp'), humid: v('wx-humid'), wind: v('wx-wind'),
+      cond: v('wx-cond'), paveTemp: v('wx-pavetemp')
+    },
+    tickets,
+    water: { start: v('meter-start'), end: v('meter-end'), notes: v('water-notes') },
+    foam: { emulIn: v('foam-emul-in'), pct: v('foam-pct') },
+    fieldNotes: v('field-notes'),
+    inspector: v('inspector-name'),
+    photos: photos.map(p => ({ id: p.id, name: p.name, src: p.src })),
+    sig: document.getElementById('sig-preview').src || null
+  };
+}
+
+function v(id) { return document.getElementById(id)?.value || ''; }
+
+function saveReport() {
+  const data = gatherData();
+  const reports = JSON.parse(localStorage.getItem('cdm_reports') || '[]');
+  const existing = reports.findIndex(r => r.job.date === data.job.date);
+  if (existing >= 0) reports[existing] = data;
+  else reports.unshift(data);
+  localStorage.setItem('cdm_reports', JSON.stringify(reports.slice(0, 60)));
+  toast('Report saved ✓');
+  renderHistory();
+}
+
+function renderHistory() {
+  const reports = JSON.parse(localStorage.getItem('cdm_reports') || '[]');
+  const list = document.getElementById('history-list');
+  if (!reports.length) { list.innerHTML = '<p style="color:var(--muted);font-size:13px;">No saved reports yet.</p>'; return; }
+  list.innerHTML = reports.map((r,i) => `
+    <div class="hist-item" onclick="loadReport(${i})">
+      <h3>${r.job.appType || 'CIR'} · ${r.job.date}</h3>
+      <p>${r.job.name || 'Unnamed job'} · ${r.job.location || 'No location'} · ${r.production.feet || '--'} ft</p>
+    </div>
+  `).join('');
+}
+
+function loadReport(idx) {
+  const reports = JSON.parse(localStorage.getItem('cdm_reports') || '[]');
+  const r = reports[idx];
+  if (!r) return;
+  fillFields(r);
+  toast('Report loaded ✓');
+  showTab('job');
+}
+
+function loadPrevDay() {
+  const reports = JSON.parse(localStorage.getItem('cdm_reports') || '[]');
+  if (!reports.length) { toast('No previous reports found'); return; }
+  const r = reports[0];
+  // Fill mix design and job info from previous day
+  setField('job-name', r.job.name);
+  setField('app-type', r.job.appType);
+  setField('foreman', r.job.foreman);
+  setField('job-location', r.job.location);
+  setField('emul-pct', r.mix.emulPct);
+  setField('cement-pct', r.mix.cementPct);
+  setField('water-pct', r.mix.waterPct);
+  setField('add-pct', r.mix.addPct);
+  setField('dry-density', r.mix.dryDensity);
+  setField('depth-in', r.mix.depth);
+  setField('width-ft', r.mix.width);
+  calcMix();
+  toast('Previous mix design loaded ✓');
+}
+
+function fillFields(r) {
+  Object.entries(r.job||{}).forEach(([k,v]) => { const m = {'name':'job-name','date':'job-date','startTime':'start-time','endTime':'end-time','appType':'app-type','foreman':'foreman','location':'job-location'}; if(m[k]) setField(m[k],v); });
+  if (r.job?.appType) setAppType(r.job.appType);
+  Object.entries(r.mix||{}).forEach(([k,v]) => { const m = {'emulPct':'emul-pct','cementPct':'cement-pct','waterPct':'water-pct','addPct':'add-pct','dryDensity':'dry-density','depth':'depth-in','width':'width-ft','length':'length-ft'}; if(m[k]) setField(m[k],v); });
+  if (r.mix?.binderType) setBinderType(r.mix.binderType);
+  calcMix();
+  if (r.tickets) { tickets = r.tickets; renderTickets(); }
+  if (r.photos) { photos = r.photos; loadPhotoGrid(); }
+  setField('field-notes', r.fieldNotes);
+  setField('inspector-name', r.inspector);
+  setField('meter-start', r.water?.start);
+  setField('meter-end', r.water?.end);
+  setField('water-notes', r.water?.notes);
+}
+
+function setField(id, val) { const el = document.getElementById(id); if(el && val !== undefined && val !== null) el.value = val; }
+
+function clearHistory() {
+  if (!confirm('Clear all saved reports?')) return;
+  localStorage.removeItem('cdm_reports');
+  renderHistory();
+  toast('History cleared');
+}
+
+// ═══════════ EXPORT (print) ═══════════
+function exportPDF() {
+  const data = gatherData();
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>CDM Production Report – ${data.job.date}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:20px;color:#111;font-size:13px;}
+      h1{font-size:20px;color:#1a2744;border-bottom:3px solid #c0392b;padding-bottom:6px;}
+      h2{font-size:14px;color:#1a2744;margin:12px 0 4px;text-transform:uppercase;}
+      table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+      td,th{border:1px solid #ddd;padding:5px 8px;text-align:left;}
+      th{background:#1a2744;color:#fff;font-size:12px;}
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+      .box{background:#f5f5f0;border-radius:4px;padding:8px;margin-bottom:4px;}
+      .label{font-size:10px;color:#888;text-transform:uppercase;}
+      .val{font-size:16px;font-weight:bold;}
+      @media print{body{padding:10px;}}
+    </style>
+  </head><body>
+    <h1>CDM Holdings – Daily Production Report</h1>
+    <div class="grid2">
+      <div class="box"><div class="label">Job / Project</div><div class="val">${data.job.name||'--'}</div></div>
+      <div class="box"><div class="label">Date</div><div class="val">${data.job.date}</div></div>
+      <div class="box"><div class="label">Application</div><div class="val">${data.job.appType}</div></div>
+      <div class="box"><div class="label">Start Time</div><div class="val">${data.job.startTime||'--'}</div></div>
+      <div class="box"><div class="label">End Time</div><div class="val">${data.job.endTime||'--'}</div></div>
+      <div class="box"><div class="label">Foreman</div><div class="val">${data.job.foreman||'--'}</div></div>
+      <div class="box"><div class="label">Location</div><div class="val">${data.job.location||'--'}</div></div>
+    </div>
+    <h2>Mix Design</h2>
+    <table><tr><th>${data.mix.binderType === 'foam' ? 'Foamed AC %' : 'Emulsion %'}</th><th>Cement %</th><th>Water %</th><th>Additive %</th><th>Dry Density</th><th>Depth</th><th>Width</th></tr>
+    <tr><td>${data.mix.emulPct}%</td><td>${data.mix.cementPct}%</td><td>${data.mix.waterPct}%</td><td>${data.mix.addPct}%</td><td>${data.mix.dryDensity} lbs/ft³</td><td>${data.mix.depth}"</td><td>${data.mix.width}'</td></tr></table>
+    <h2>Production Totals</h2>
+    <div class="grid2">
+      <div class="box"><div class="label">Feet Completed</div><div class="val">${data.production.feet||'--'} ft</div></div>
+      <div class="box"><div class="label">Total Tons RAP</div><div class="val">${data.production.rap||'--'} tons</div></div>
+      <div class="box"><div class="label">${data.mix.binderType === 'foam' ? 'Foamed AC' : 'Emulsion'}</div><div class="val">${data.production.emul||'--'} gal</div></div>
+      <div class="box"><div class="label">Cement</div><div class="val">${data.production.cement||'--'} tons</div></div>
+      <div class="box"><div class="label">Water</div><div class="val">${data.production.water||'--'} gal</div></div>
+      <div class="box"><div class="label">Additive</div><div class="val">${data.production.add||'--'} lbs</div></div>
+    </div>
+    <h2>Weather</h2>
+    <table><tr><th>Temp</th><th>Humidity</th><th>Wind</th><th>Conditions</th><th>Pave Temp</th></tr>
+    <tr><td>${data.weather.temp||'--'}°F</td><td>${data.weather.humid||'--'}%</td><td>${data.weather.wind||'--'} mph</td><td>${data.weather.cond||'--'}</td><td>${data.weather.paveTemp||'--'}°F</td></tr></table>
+    <h2>Material Tickets (${data.tickets.length})</h2>
+    ${data.tickets.length ? `<table><tr><th>#</th><th>Supplier</th><th>Material</th><th>Qty</th><th>Unit</th><th>Time</th></tr>${data.tickets.map(t=>`<tr><td>${t.num||'--'}</td><td>${t.supplier||'--'}</td><td>${t.material}</td><td>${t.qty}</td><td>${t.unit}</td><td>${t.time||'--'}</td></tr>`).join('')}</table>` : '<p>No tickets</p>'}
+    <h2>Water Meter</h2>
+    <table><tr><th>Start</th><th>End</th><th>Daily Total</th></tr>
+    <tr><td>${data.water.start||'--'} gal</td><td>${data.water.end||'--'} gal</td><td>${data.water.start && data.water.end ? (parseFloat(data.water.end)-parseFloat(data.water.start)).toLocaleString()+' gal' : '--'}</td></tr></table>
+    <h2>Notes</h2>
+    <p>${data.production.notes||data.fieldNotes||'None'}</p>
+    ${data.sig ? `<h2>Foreman Signature</h2><img src="${data.sig}" style="height:70px;border:1px solid #ccc;border-radius:4px;">` : ''}
+    ${data.inspector ? `<p><strong>Inspector:</strong> ${data.inspector}</p>` : ''}
+    <p style="margin-top:20px;font-size:11px;color:#888;">Generated by CDM Holdings Production App · ${new Date().toLocaleString()}</p>
+  </body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+
+// ═══════════ TOAST ═══════════
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
